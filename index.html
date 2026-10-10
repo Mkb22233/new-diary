@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRCC Monitoring Tour Diary</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#eef2f5;
+    margin:20px;
+}
+.controls{
+    background:white;
+    padding:15px;
+    text-align:center;
+    border-radius:8px;
+    margin-bottom:20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+.controls input, .controls select, .controls button{
+    padding:8px 12px;
+    font-size:14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.download-btn{
+    background:#d32f2f;
+    color:white;
+    border:none !important;
+    cursor:pointer;
+    font-weight: bold;
+}
+.update-btn{
+    background:#1976d2;
+    color:white;
+    border:none !important;
+    cursor:pointer;
+    font-weight: bold;
+}
+.holiday-section {
+    border-left: 2px solid #d32f2f;
+    padding-left: 10px;
+    display: flex;
+    gap: 5px;
+}
+.paper{
+    background:white;
+    padding:40px;
+    max-width:1100px;
+    margin:auto;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+h2,h3,h4{
+    text-align:center;
+    margin:5px 0;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12px;
+}
+th,td{
+    border:1px solid black;
+    padding:6px;
+}
+th{
+    background:#f2f2f2;
+}
+.footer{
+    margin-top:40px;
+    display:flex;
+    justify-content:space-between;
+}
+
+@media screen and (max-width: 600px) {
+    .controls { flex-direction: column; }
+    .controls input, .controls select { width: 100%; }
+    .paper { padding: 15px; overflow-x: auto; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="controls">
+    <input type="text" id="crccInput" value="Mohan Kumar Behera" oninput="updateName()" placeholder="CRCC Name">
+    
+    <select id="selectYear" onchange="generateDiary()"></select>
+
+    <select id="selectMonth" onchange="generateDiary()">
+        <option value="0">January</option><option value="1" selected>February</option>
+        <option value="2">March</option><option value="3">April</option>
+        <option value="4">May</option><option value="5">June</option>
+        <option value="6">July</option><option value="7">August</option>
+        <option value="8">September</option><option value="9">October</option>
+        <option value="10">November</option><option value="11">December</option>
+    </select>
+
+    <div class="holiday-section">
+        <input type="text" id="holidayDates" placeholder="Dates (e.g. 15, 26)">
+        <input type="text" id="holidayReason" placeholder="Holiday For? (e.g. Puja)">
+        <button class="update-btn" onclick="applyHolidays()">Update Leave</button>
+    </div>
+
+    <button class="download-btn" onclick="downloadPDF()">Download PDF</button>
+</div>
+
+<div class="paper" id="diaryContent">
+
+<h3>Office of the Cluster Resource Centre Coordinator</h3>
+<h4>Cluster: Anlakuda | Block: Suliapada | District: Mayurbhanj</h4>
+<h2 style="text-decoration:underline;">Monitoring Tour Diary</h2>
+
+<p><strong>Name:</strong> <span id="displayName">Mohan Kumar Behera</span> (CRCC)</p>
+<p id="displayDate"><strong>Month:</strong> February 2026-2027</p>
+
+<table>
+<thead>
+<tr>
+<th width="10%">Date</th>
+<th width="10%">Day</th>
+<th width="22%">School / Place</th>
+<th width="18%">Purpose</th>
+<th>Monitoring Notes / Observations</th>
+</tr>
+</thead>
+<tbody id="diaryBody"></tbody>
+</table>
+
+<div class="footer">
+<div>
+Submitted To:<br>
+Block Education Officer<br>
+Suliapada Block
+</div>
+<div>
+<br><br>
+_____________________<br>
+(<span id="displaySignatureName">Mohan Kumar Behera</span>)<br>
+CRCC, Anlakuda
+</div>
+</div>
+
+</div>
+
+<script>
+const schools = ["GOVT PS ANLAKUDA", "GOVT UPS ANLAKUDA", "GOVT PS BANGRIPOSI", "GOVT UPS BHADUASOLE", "GOVT PS DHADANGIRI", "GOVT PS DHABANISOLE", "GOVT PS DHADASAHI", "GOVT UPS KUSUMASOLE", "GOVT PS NADIGAN", "GOVT PS NEDHUA", "GOVT PS PATHARA", "GOVT UPS RANGAMATIA", "GOVT. AIDED NAGSOL UPS", "ANLAKUDA G.P. HS", "KUSUMASOLE HS", "CLRC MEETING", "OFFICE WORK", "HOLIDAY / SUNDAY"];
+
+const purposes = ["Academic Monitoring", "MDM Supervision", "Attendance Audit", "SMC Meeting", "Record Verification", "Infrastructure Check", "CWSN Support", "FLN Monitoring", "Textbook Distribution", "Uniform Distribution", "Scholarship Verification", "Cluster Level Meeting", "Office Documentation", "Holiday", "Sunday"];
+
+const observationBank = ["Classroom transaction found effective and child-centric.", "Student learning outcomes are aligned with the lesson plan.", "MDM quality checked; hygienic conditions maintained in kitchen.", "Teacher attendance register verified and found up-to-date.", "TLM used effectively during the teaching-learning process.", "SMC members actively participating in school development.", "Drinking water and toilet facilities found clean and functional.", "Students are able to read and write fluently in Odia.", "Progress observed in foundational literacy and numeracy.", "Stock register for textbooks and uniforms tallied correctly.", "Library books are being utilized by students regularly.", "ICT lab is functional and students are learning basic skills.", "CWSN students provided with necessary accessibility support.", "Proper record maintenance of MDM food grains and expenses.", "Safe drinking water facility is available for all students.", "Classroom walls are decorated with informative charts.", "Regular parent-teacher meetings are being conducted.", "Teachers are using DIKSHA portal for digital resources.", "Sports activities are integrated into the daily schedule.", "School premises are free from water-logging and hazards.", "Continuous and Comprehensive Evaluation (CCE) followed.", "Workbooks are regularly checked and corrected by teachers.", "Student health cards are maintained properly.", "Safety norms followed during the preparation of MDM.", "Remedial classes conducted for slow learners.", "Attendance of girl students found to be improving.", "Greenery maintained in school through the kitchen garden.", "Students participated in cleanliness drive (Swachhata).", "Academic calendar followed strictly for all subjects.", "Teacher-student ratio maintained as per RTE norms.", "Classroom lighting and ventilation found adequate.", "Discipline among students during assembly was excellent.", "Teaching through play-way method observed in primary wing.", "Registers for various government schemes updated.", "Boundary wall found intact and provides adequate security.", "Proper storage of dry ration for MDM observed.", "Fire extinguishers are installed and in working condition.", "Science kit being used for practical demonstrations.", "Math kit utilized for teaching abstract concepts.", "Students are aware of basic hygiene and handwashing.", "School Cabinet (Meena Bazar) is active and functional.", "Branding of school building done under 5T initiative.", "Regular monitoring of student portfolios observed.", "Learning corners established in every classroom.", "Innovation in teaching methods by staff appreciated.", "Timely submission of monthly progress reports.", "Scholarship amounts credited to student accounts.", "Uniforms distributed to all eligible students.", "Textbooks available for all subjects and classes.", "School development plan (SDP) prepared by SMC.", "Transparency board updated with latest school data.", "Teaching of English improved through phonetics.", "Odia handwriting of students found to be neat.", "Participation in block level sports and competitions.", "Guidance provided for improving weak subject areas.", "Observation of Nua-O and other cultural activities.", "Focus on environmental education and plantation.", "Proper documentation of CWSN aids and appliances.", "School budget utilized as per committee resolutions.", "U-DISE data verified with physical records.", "Staff coordination found exemplary for school growth.", "Community contribution for school infrastructure noted.", "Usage of smart boards for interactive learning.", "Morning assembly includes yoga and moral stories.", "Maintenance of separate toilets for boys and girls.", "Observation of National days with high enthusiasm.", "Zero dropout target achieved in the current session.", "Transition rate of students found satisfactory.", "Effective implementation of 'Hema' scheme observed.", "Periodic assessment results shared with parents.", "Teachers participating in cluster level workshops.", "Utilization of school grant for minor repairs.", "Identification of out-of-school children conducted.", "Special focus on tribal student integration.", "Proper disposal of school waste managed.", "First aid kit replenished with necessary medicines.", "Lab equipments for high school found in order.", "Regular monitoring of teacher diary entries.", "Guidance on career counseling for senior students.", "Implementation of 'Mo School' Abhiyan initiatives.", "Monitoring of student transition from PS to UPS.", "Review of teacher performance indicators (PINDICS).", "Availability of electricity and functional fans.", "Observation of World Environment Day activities.", "Reading room established for enhancing reading habits.", "Support provided for slow learners in Mathematics.", "Quality of education in English medium wing checked.", "Verification of student Aadhaar seeding status.", "Monitoring of bicycle distribution for Class IX.", "Evaluation of answer scripts done with feedback.", "Supervision of co-scholastic activities.", "Integration of art and craft in the curriculum.", "Observation of safety drills for disaster management.", "Verification of cash book and bank passbooks.", "Compliance with government orders and circulars.", "Engagement of guest teachers where required.", "Monitoring of student transport facilities if any.", "Quality of snacks provided in residential setups.", "General behavior and ethics of students found good.", "Overall school environment found conducive for learning."];
+
+function setupYearDropdown() {
+    const sel = document.getElementById("selectYear");
+    for(let i=2000; i<=2050; i++) {
+        let opt = document.createElement("option");
+        opt.value = i; opt.text = i;
+        if(i === 2026) opt.selected = true;
+        sel.appendChild(opt);
+    }
+}
+
+function updateName(){
+    let name=document.getElementById("crccInput").value;
+    document.getElementById("displayName").innerText=name;
+    document.getElementById("displaySignatureName").innerText=name;
+}
+
+function generateDiary(){
+    const month=parseInt(document.getElementById("selectMonth").value);
+    const year=parseInt(document.getElementById("selectYear").value);
+    
+    const tbody=document.getElementById("diaryBody");
+    tbody.innerHTML="";
+    const daysInMonth=new Date(year, month+1, 0).getDate();
+    const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+    
+    document.getElementById("displayDate").innerHTML=`<strong>Month:</strong> ${monthNames[month]} ${year}-${year+1}`;
+
+    for(let day=1; day<=daysInMonth; day++){
+        const dateObj=new Date(year, month, day);
+        const dayName=dateObj.toLocaleDateString("en-US",{weekday:"long"});
+        const dateStr=(day<10?"0"+day:day)+"."+(month+1<10?"0"+(month+1):(month+1))+"."+year;
+
+        const tr=document.createElement("tr");
+        
+        tr.innerHTML=`
+            <td class="date-col">${dateStr}</td>
+            <td class="day-col" data-original-day="${dayName}">${dayName}</td>
+            <td>
+                <select class="pdf-select school-select" style="width:100%; border:none; background:transparent;">
+                    <option value="">-- Select --</option>
+                    ${schools.map(s=>`<option value="${s}">${s}</option>`).join("")}
+                </select>
+            </td>
+            <td>
+                <select class="pdf-select purpose-select" style="width:100%; border:none; background:transparent;">
+                    <option value="">-- Select --</option>
+                    ${purposes.map(p=>`<option value="${p}">${p}</option>`).join("")}
+                </select>
+            </td>
+            <td>
+                <select class="obs-picker" onchange="this.nextElementSibling.innerText=this.value" style="width:100%; border:none; background:transparent; display:block; margin-bottom:5px;">
+                    <option value="">-- Quick Notes --</option>
+                    ${observationBank.map(o=>`<option value="${o}">${o.substring(0,40)}...</option>`).join("")}
+                </select>
+                <div contenteditable="true" class="note-box" style="min-height:20px;"></div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    }
+    
+    // Auto-apply holidays immediately when generating the month
+    applyHolidays();
+}
+
+function applyHolidays() {
+    const holidayInput = document.getElementById("holidayDates").value;
+    const hReason = document.getElementById("holidayReason").value || "Holiday";
+    const manualHolidays = holidayInput.split(',').map(s => s.trim()).filter(s => s !== "");
+    
+    const rows = document.querySelectorAll("#diaryBody tr");
+    rows.forEach((row, index) => {
+        const day = index + 1;
+        const dayCol = row.querySelector(".day-col");
+        const originalDayName = dayCol.getAttribute("data-original-day");
+        
+        const schoolSelect = row.querySelector(".school-select");
+        const purposeSelect = row.querySelector(".purpose-select");
+        const noteBox = row.querySelector(".note-box");
+        
+        const isSunday = originalDayName === "Sunday";
+        const isManualHoliday = manualHolidays.includes(day.toString());
+
+        // Update all columns except the Date (which is left completely alone)
+        if (isManualHoliday) {
+            dayCol.innerHTML = `${originalDayName} <br><small>(${hReason})</small>`;
+            schoolSelect.value = "HOLIDAY / SUNDAY";
+            purposeSelect.value = "Holiday";
+            noteBox.innerText = "School closed - " + hReason;
+        } else if (isSunday) {
+            dayCol.innerHTML = `${originalDayName}`;
+            schoolSelect.value = "HOLIDAY / SUNDAY";
+            purposeSelect.value = "Sunday";
+            noteBox.innerText = "School closed - Sunday.";
+        } else {
+            // Restore normal non-holiday state
+            dayCol.innerHTML = `${originalDayName}`;
+            if (schoolSelect.value === "HOLIDAY / SUNDAY") {
+                schoolSelect.value = "";
+                purposeSelect.value = "";
+                noteBox.innerText = "";
+            }
+        }
+    });
+}
+
+function downloadPDF(){
+    const element = document.getElementById("diaryContent");
+    const rows = document.querySelectorAll("#diaryBody tr");
+    rows.forEach(row => {
+        const selects = row.querySelectorAll("select");
+        selects.forEach(sel => {
+            const val = sel.value;
+            const textNode = document.createElement("span");
+            textNode.className = "temp-text";
+            textNode.innerText = val === "" ? "" : val;
+            sel.style.display = "none";
+            sel.parentNode.insertBefore(textNode, sel);
+        });
+    });
+
+    var opt={
+        margin:5,
+        filename:`Tour_Diary_${document.getElementById("selectMonth").value}_${document.getElementById("selectYear").value}.pdf`,
+        image:{type:"jpeg",quality:0.98},
+        html2canvas:{scale:2},
+        jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        document.querySelectorAll(".temp-text").forEach(el => el.remove());
+        document.querySelectorAll(".paper select").forEach(sel => sel.style.display = "block");
+    });
+}
+
+window.onload=function(){
+    setupYearDropdown();
+    generateDiary();
+    updateName();
+};
+</script>
+
+</body>
+</html><ALOASK-SEPARATE-EDITORS><ALOASK-SEPARATE-EDITORS>
