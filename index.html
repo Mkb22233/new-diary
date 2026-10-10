@@ -173,6 +173,27 @@ function updateName(){
     document.getElementById("displaySignatureName").innerText=name;
 }
 
+// Function to handle adding quick notes smartly
+function addNote(selectEl) {
+    const val = selectEl.value;
+    if (!val) return; // Ignore if "-- Quick Notes --" is selected
+    
+    const noteBox = selectEl.nextElementSibling;
+    const currentText = noteBox.innerText.trim();
+    
+    // Only append if this specific note isn't already in the box
+    if (!currentText.includes(val)) {
+        if (currentText === "") {
+            noteBox.innerText = val;
+        } else {
+            noteBox.innerText = currentText + " " + val;
+        }
+    }
+    
+    // Instantly reset dropdown back to default, leaving the UI clean
+    selectEl.value = "";
+}
+
 function generateDiary(){
     const month=parseInt(document.getElementById("selectMonth").value);
     const year=parseInt(document.getElementById("selectYear").value);
@@ -207,7 +228,7 @@ function generateDiary(){
                 </select>
             </td>
             <td>
-                <select class="obs-picker" onchange="this.nextElementSibling.innerText=this.value" style="width:100%; border:none; background:transparent; display:block; margin-bottom:5px;">
+                <select class="obs-picker" onchange="addNote(this)" style="width:100%; border:none; background:transparent; display:block; margin-bottom:5px;">
                     <option value="">-- Quick Notes --</option>
                     ${observationBank.map(o=>`<option value="${o}">${o.substring(0,40)}...</option>`).join("")}
                 </select>
@@ -299,4 +320,4 @@ window.onload=function(){
 </script>
 
 </body>
-</html><ALOASK-SEPARATE-EDITORS><ALOASK-SEPARATE-EDITORS>
+</html>
